@@ -28,7 +28,7 @@ jobs:
       - name: Build archive (code signing disabled)
         run: |
           xcodebuild clean archive \
-            -scheme bitchat (iOS) \
+            -scheme "bitchat (iOS)" \
             -project BitChat.xcodeproj \
             -destination "generic/platform=iOS" \
             -archivePath build/BitChat.xcarchive \
