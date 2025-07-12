@@ -1,4 +1,4 @@
-name: Build BitChat IPA
+name: Build Unsigned BitChat IPA
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout source
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Install XcodeGen
@@ -17,42 +17,22 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
-      - name: Set Xcode version (if needed)
-        run: sudo xcode-select -s /Applications/Xcode_15.2.app
-
-      - name: Build archive (code signing disabled)
+      - name: Build BitChat archive (no signing)
         run: |
           xcodebuild clean archive \
             -scheme "bitchat (iOS)" \
-            -project BitChat.xcodeproj \
+            -project bitchat.xcodeproj \
             -destination "generic/platform=iOS" \
-            -archivePath build/BitChat.xcarchive \
-            CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+            -archivePath build/bitchat.xcarchive \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
 
-      - name: Export unsigned IPA
+      - name: Manually package .ipa
         run: |
-          cat > ExportOptions.plist <<EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key>
-            <string>development</string>
-            <key>signingStyle</key>
-            <string>manual</string>
-            <key>stripSwiftSymbols</key>
-            <true/>
-            <key>compileBitcode</key>
-            <false/>
-          </dict>
-          </plist>
-          EOF
-
-          xcodebuild -exportArchive \
-            -archivePath build/BitChat.xcarchive \
-            -exportPath build/export \
-            -exportOptionsPlist ExportOptions.plist \
-            CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+          mkdir -p Payload
+          cp -r build/bitchat.xcarchive/Products/Applications/*.app Payload/
+          zip -r BitChat.ipa Payload
+          mkdir -p build/export
+          mv BitChat.ipa build/export/
 
       - name: Upload unsigned IPA
         uses: actions/upload-artifact@v4
