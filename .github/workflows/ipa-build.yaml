@@ -32,7 +32,7 @@ jobs:
             -project BitChat.xcodeproj \
             -destination "generic/platform=iOS" \
             -archivePath build/BitChat.xcarchive \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
       - name: Export unsigned IPA
         run: |
@@ -57,7 +57,7 @@ jobs:
             -archivePath build/BitChat.xcarchive \
             -exportPath build/export \
             -exportOptionsPlist ExportOptions.plist \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
       - name: Upload unsigned IPA
         uses: actions/upload-artifact@v4
